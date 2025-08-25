@@ -2,7 +2,7 @@
 package ui
 
 // Экспортируем все компоненты из внутреннего пакета
-import "./internal/ui"
+import "go-ui-library/internal/ui"
 
 // Re-export всех типов и функций для удобства использования
 

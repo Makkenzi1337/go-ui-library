@@ -5,7 +5,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"go-ui-library/ui"
+	"go-ui-library"
 )
 
 func main() {
