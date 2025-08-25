@@ -13,7 +13,7 @@
 ## Установка
 
 ```bash
-go get github.com/yourusername/go-ui-library
+go get github.com/Makkenzi1337/go-ui-library
 ```
 
 ## Быстрый старт
@@ -22,26 +22,33 @@ go get github.com/yourusername/go-ui-library
 package main
 
 import (
-    "fyne.io/fyne/v2/app"
-    "fyne.io/fyne/v2/container"
-    "fyne.io/fyne/v2/widget"
-    "github.com/yourusername/go-ui-library/ui"
+    "fyne.io/fyne/v2"
+    "fyne.io/fyne/v2/theme"
+    "github.com/Makkenzi1337/go-ui-library"
 )
 
 func main() {
-    myApp := app.New()
-    window := myApp.NewWindow("Моё приложение")
+    // Создаем приложение
+    app := ui.NewApp()
+    
+    // Создаем главное окно
+    window := app.NewWindow("Моё приложение")
+    window.Resize(fyne.NewSize(400, 300))
+    window.Center()
     
     // Создаем кнопку с обработчиком
     button := ui.NewButton("Нажми меня!", func() {
-        // Ваш код здесь
+        ui.ShowInfo("Привет!", "Кнопка была нажата!", window)
     })
     
     // Создаем слайдер
     slider := ui.NewSlider(0, 100, 50)
+    slider.OnChanged = func(value float64) {
+        fmt.Printf("Значение: %.2f\n", value)
+    }
     
     // Размещаем элементы
-    content := container.NewVBox(button, slider)
+    content := ui.NewVBox(button, slider)
     window.SetContent(content)
     
     window.ShowAndRun()
@@ -58,7 +65,7 @@ button := ui.NewButton("Текст кнопки", func() {
 })
 
 // Кнопка с иконкой
-button := ui.NewButtonWithIcon("Текст", icon, func() {
+button := ui.NewButtonWithIcon("Текст", theme.InfoIcon(), func() {
     // обработчик
 })
 ```
@@ -93,7 +100,32 @@ input.OnChanged = func(text string) {
 
 ## Примеры
 
-Смотрите папку `examples/` для полных примеров приложений.
+Смотрите папку `examples/` для полных примеров приложений:
+
+- **simple/** - Простой пример с базовыми компонентами
+- **cards/** - Пример с карточками, списками и таблицами
+- **advanced/** - Продвинутый пример с формами и вкладками
+
+### Запуск примеров
+
+```bash
+# Простой пример
+make simple
+
+# Пример с карточками
+make cards
+
+# Продвинутый пример
+make advanced
+
+# Все примеры
+make examples
+```
+
+## Требования
+
+- Go 1.21+
+- Fyne v2.4.1+
 
 ## Лицензия
 
