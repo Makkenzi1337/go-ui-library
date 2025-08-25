@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
 	"go-ui-library"
 )
@@ -12,7 +13,7 @@ func main() {
 	
 	// Создаем главное окно
 	window := app.NewWindow("Простое приложение")
-	window.Resize(ui.NewSize(400, 300))
+	window.Resize(fyne.NewSize(400, 300))
 	window.Center()
 	
 	// Создаем компоненты

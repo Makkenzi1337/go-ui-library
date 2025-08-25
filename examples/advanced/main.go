@@ -1,9 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 	"go-ui-library"
 )
 
@@ -13,49 +14,8 @@ func main() {
 	
 	// Создаем главное окно
 	window := app.NewWindow("Продвинутое приложение")
-	window.Resize(ui.NewSize(800, 600))
+	window.Resize(fyne.NewSize(800, 600))
 	window.Center()
-	
-	// Создаем меню
-	fileMenu := ui.Menu("Файл",
-		ui.MenuItem("Новый", theme.DocumentCreateIcon(), func() {
-			ui.ShowInfo("Файл", "Создать новый файл", window)
-		}),
-		ui.MenuItem("Открыть", theme.FolderOpenIcon(), func() {
-			ui.ShowFileOpen(func(uri fyne.URI) {
-				ui.ShowInfo("Файл", "Открыт файл: "+uri.Name(), window)
-			}, window)
-		}),
-		ui.MenuItem("Сохранить", theme.DocumentSaveIcon(), func() {
-			ui.ShowFileSave(func(writer fyne.URIWriteCloser) {
-				ui.ShowInfo("Файл", "Файл сохранен", window)
-			}, window)
-		}),
-		ui.MenuItemSeparator(),
-		ui.MenuItem("Выход", theme.CancelIcon(), func() {
-			window.Close()
-		}),
-	)
-	
-	editMenu := ui.Menu("Правка",
-		ui.MenuItem("Вырезать", theme.ContentCutIcon(), func() {
-			ui.ShowInfo("Правка", "Вырезать", window)
-		}),
-		ui.MenuItem("Копировать", theme.ContentCopyIcon(), func() {
-			ui.ShowInfo("Правка", "Копировать", window)
-		}),
-		ui.MenuItem("Вставить", theme.ContentPasteIcon(), func() {
-			ui.ShowInfo("Правка", "Вставить", window)
-		}),
-	)
-	
-	helpMenu := ui.Menu("Помощь",
-		ui.MenuItem("О программе", theme.HelpIcon(), func() {
-			ui.ShowInfo("О программе", "Продвинутое приложение v1.0\nСоздано с помощью Go UI Library", window)
-		}),
-	)
-	
-	menuBar := ui.NewMenuBar(fileMenu, editMenu, helpMenu)
 	
 	// Создаем панель инструментов
 	toolbar := ui.NewToolbar(
@@ -104,17 +64,17 @@ func main() {
 	
 	// Вкладка 3: Форма
 	formContent := ui.NewForm(
-		ui.NewFormItem("Имя:", ui.NewEntry()),
-		ui.NewFormItem("Email:", ui.NewEntry()),
-		ui.NewFormItem("Возраст:", ui.NewEntry()),
-		ui.NewFormItem("Пол:", ui.NewSelect([]string{"Мужской", "Женский"})),
+		widget.NewFormItem("Имя:", ui.NewEntry()),
+		widget.NewFormItem("Email:", ui.NewEntry()),
+		widget.NewFormItem("Возраст:", ui.NewEntry()),
+		widget.NewFormItem("Пол:", ui.NewSelect([]string{"Мужской", "Женский"})),
 	)
 	
 	// Создаем вкладки
 	tabs := ui.NewTabs(
-		ui.NewTabItem("Основная", mainContent),
-		ui.NewTabItem("Настройки", settingsContent),
-		ui.NewTabItem("Форма", formContent),
+		container.NewTabItem("Основная", mainContent),
+		container.NewTabItem("Настройки", settingsContent),
+		container.NewTabItem("Форма", formContent),
 	)
 	
 	// Создаем строку состояния

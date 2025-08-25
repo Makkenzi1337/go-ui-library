@@ -5,6 +5,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"fyne.io/fyne/v2/container"
 	"go-ui-library"
 )
 
@@ -14,7 +15,7 @@ func main() {
 	
 	// Создаем главное окно
 	window := app.NewWindow("Приложение с карточками")
-	window.Resize(ui.NewSize(900, 700))
+	window.Resize(fyne.NewSize(900, 700))
 	window.Center()
 	
 	// Создаем карточки
@@ -93,14 +94,14 @@ func main() {
 	
 	// Создаем вкладки
 	tabs := ui.NewTabs(
-		ui.NewTabItem("Карточки", cardsGrid),
-		ui.NewTabItem("Список", list),
-		ui.NewTabItem("Таблица", table),
+		container.NewTabItem("Карточки", cardsGrid),
+		container.NewTabItem("Список", list),
+		container.NewTabItem("Таблица", table),
 	)
 	
 	// Создаем панель инструментов
 	toolbar := ui.NewToolbar(
-		ui.ToolbarAction(theme.AddIcon(), "Добавить", func() {
+		ui.ToolbarAction(theme.ContentAddIcon(), "Добавить", func() {
 			ui.ShowInfo("Панель инструментов", "Добавить новый элемент", window)
 		}),
 		ui.ToolbarAction(theme.DeleteIcon(), "Удалить", func() {

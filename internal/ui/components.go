@@ -3,7 +3,6 @@ package ui
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -52,12 +51,6 @@ func NewTable(length func() (int, int), createCell func() fyne.CanvasObject, upd
 		Table: widget.NewTable(length, createCell, updateCell),
 	}
 	
-	table.OnSelected = func(id widget.TableCellID) {
-		if table.OnSelected != nil {
-			table.OnSelected(id.Row, id.Col)
-		}
-	}
-	
 	return table
 }
 
@@ -75,13 +68,15 @@ func NewForm(items ...*widget.FormItem) *Form {
 
 // FormItem представляет собой элемент формы
 type FormItem struct {
-	*widget.FormItem
+	Text   string
+	Widget fyne.CanvasObject
 }
 
 // NewFormItem создает новый элемент формы
 func NewFormItem(text string, widget fyne.CanvasObject) *FormItem {
 	return &FormItem{
-		FormItem: widget.NewFormItem(text, widget),
+		Text:   text,
+		Widget: widget,
 	}
 }
 
@@ -140,13 +135,13 @@ func ToolbarSeparator() widget.ToolbarItem {
 
 // MenuBar представляет собой улучшенное меню
 type MenuBar struct {
-	*widget.MenuBar
+	*fyne.MainMenu
 }
 
 // NewMenuBar создает новое меню
 func NewMenuBar(menus ...*fyne.Menu) *MenuBar {
 	return &MenuBar{
-		MenuBar: widget.NewMenuBar(menus...),
+		MainMenu: fyne.NewMainMenu(menus...),
 	}
 }
 

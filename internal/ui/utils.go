@@ -2,18 +2,18 @@ package ui
 
 import (
 	"fmt"
+	"image/color"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
-	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
 // App представляет собой улучшенное приложение
 type App struct {
-	*fyne.App
+	fyne.App
 	windows []fyne.Window
 }
 
@@ -101,28 +101,55 @@ func ShowConfirm(title, message string, callback func(bool), window fyne.Window)
 
 // ShowInput показывает диалоговое окно ввода
 func ShowInput(title, message string, callback func(string), window fyne.Window) {
-	dialog.ShowForm(title, message, 
-		widget.NewEntry(),
-		func(confirmed bool) {
-			if confirmed {
-				callback("")
-			}
-		}, window)
+	entry := widget.NewEntry()
+	formItem := &widget.FormItem{
+		Text:   "Введите текст:",
+		Widget: entry,
+	}
+	dialog.ShowForm(title, "Подтвердить", "Отмена", []*widget.FormItem{formItem}, func(confirmed bool) {
+		if confirmed {
+			callback(entry.Text)
+		}
+	}, window)
 }
 
 // ShowFileOpen показывает диалоговое окно открытия файла
 func ShowFileOpen(callback func(fyne.URI), window fyne.Window) {
-	dialog.ShowFileOpen(callback, window)
+	dialog.ShowFileOpen(func(reader fyne.URIReadCloser, err error) {
+		if err != nil {
+			ShowError(err, window)
+			return
+		}
+		if reader != nil {
+			callback(reader.URI())
+		}
+	}, window)
 }
 
 // ShowFileSave показывает диалоговое окно сохранения файла
 func ShowFileSave(callback func(fyne.URIWriteCloser), window fyne.Window) {
-	dialog.ShowFileSave(callback, window)
+	dialog.ShowFileSave(func(writer fyne.URIWriteCloser, err error) {
+		if err != nil {
+			ShowError(err, window)
+			return
+		}
+		if writer != nil {
+			callback(writer)
+		}
+	}, window)
 }
 
 // ShowFolderOpen показывает диалоговое окно открытия папки
 func ShowFolderOpen(callback func(fyne.ListableURI), window fyne.Window) {
-	dialog.ShowFolderOpen(callback, window)
+	dialog.ShowFolderOpen(func(list fyne.ListableURI, err error) {
+		if err != nil {
+			ShowError(err, window)
+			return
+		}
+		if list != nil {
+			callback(list)
+		}
+	}, window)
 }
 
 // ProgressDialog представляет собой диалоговое окно с прогрессом
@@ -154,40 +181,51 @@ type Layout struct {
 	fyne.Layout
 }
 
-// NewPaddedLayout создает макет с отступами
-func NewPaddedLayout() *Layout {
-	return &Layout{
-		Layout: container.NewPadded(),
+// NewPaddedLayout создает контейнер с отступами
+func NewPaddedLayout(objects ...fyne.CanvasObject) *Container {
+	return &Container{
+		Container: container.NewPadded(objects...),
 	}
 }
 
-// NewMaxLayout создает макет на весь размер
-func NewMaxLayout() *Layout {
-	return &Layout{
-		Layout: container.NewMax(),
+// NewMaxLayout создает контейнер с максимальным размером
+func NewMaxLayout(objects ...fyne.CanvasObject) *Container {
+	return &Container{
+		Container: container.NewMax(objects...),
 	}
 }
 
-// NewCenterLayout создает центрированный макет
-func NewCenterLayout() *Layout {
-	return &Layout{
-		Layout: container.NewCenter(),
+// NewCenterLayout создает центрированный контейнер
+func NewCenterLayout(objects ...fyne.CanvasObject) *Container {
+	return &Container{
+		Container: container.NewCenter(objects...),
 	}
 }
 
-// NewHScroll создает горизонтальную прокрутку
-func NewHScroll(content fyne.CanvasObject) *fyne.Container {
-	return container.NewHScroll(content)
+// Scroll представляет собой скроллируемый контейнер
+type Scroll struct {
+	*container.Scroll
 }
 
-// NewVScroll создает вертикальную прокрутку
-func NewVScroll(content fyne.CanvasObject) *fyne.Container {
-	return container.NewVScroll(content)
+// NewHScroll создает горизонтальный скролл
+func NewHScroll(content fyne.CanvasObject) *Scroll {
+	return &Scroll{
+		Scroll: container.NewHScroll(content),
+	}
 }
 
-// NewBothScroll создает прокрутку в обеих направлениях
-func NewBothScroll(content fyne.CanvasObject) *fyne.Container {
-	return container.NewScroll(content)
+// NewVScroll создает вертикальный скролл
+func NewVScroll(content fyne.CanvasObject) *Scroll {
+	return &Scroll{
+		Scroll: container.NewVScroll(content),
+	}
+}
+
+// NewBothScroll создает двунаправленный скролл
+func NewBothScroll(content fyne.CanvasObject) *Scroll {
+	return &Scroll{
+		Scroll: container.NewScroll(content),
+	}
 }
 
 // Theme представляет собой тему приложения
@@ -211,22 +249,16 @@ func SetDarkTheme() {
 }
 
 // Color представляет собой цвет
-type Color struct {
-	fyne.Color
-}
+type Color = color.Color
 
 // NewColor создает новый цвет
-func NewColor(r, g, b, a float64) Color {
-	return Color{
-		Color: fyne.NewColor(r, g, b, a),
-	}
+func NewColor(r, g, b, a uint8) Color {
+	return color.RGBA{r, g, b, a}
 }
 
-// NewRGBA создает цвет из RGBA значений
+// NewRGBA создает новый цвет из RGBA значений
 func NewRGBA(r, g, b, a uint8) Color {
-	return Color{
-		Color: fyne.NewColor(float64(r)/255, float64(g)/255, float64(b)/255, float64(a)/255),
-	}
+	return color.RGBA{r, g, b, a}
 }
 
 // Common colors
@@ -290,9 +322,16 @@ func CreateSidebarLayout(sidebar, content fyne.CanvasObject) *fyne.Container {
 	return container.NewBorder(nil, nil, sidebar, nil, content)
 }
 
+// Split представляет собой разделитель
+type Split struct {
+	*container.Split
+}
+
 // CreateSplitLayout создает компоновку с разделителем
-func CreateSplitLayout(left, right fyne.CanvasObject) *fyne.Container {
-	return container.NewHSplit(left, right)
+func CreateSplitLayout(left, right fyne.CanvasObject) *Split {
+	return &Split{
+		Split: container.NewHSplit(left, right),
+	}
 }
 
 // Utility функции
