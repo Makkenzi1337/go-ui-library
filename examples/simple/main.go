@@ -19,53 +19,79 @@ func main() {
 	// Создаем компоненты
 	label := ui.NewLabel("Добро пожаловать в наше приложение!")
 	
-	// Кнопка с обработчиком
-	button := ui.NewButton("Нажми меня!", func() {
-		ui.ShowInfo("Привет!", "Кнопка была нажата!", window)
-	})
+	// Поле ввода с валидацией
+	entry := ui.NewEntry()
+	entry.SetPlaceHolder("Введите имя (мин 3 символа)...")
 	
-	// Кнопка с иконкой
-	iconButton := ui.NewButtonWithIcon("Кнопка с иконкой", theme.InfoIcon(), func() {
-		ui.ShowInfo("Иконка", "Кнопка с иконкой была нажата!", window)
+	// Кнопка сохранения (по умолчанию неактивна)
+	saveBtn := ui.NewButtonWithIcon("Сохранить", theme.ConfirmIcon(), func() {
+		ui.ShowInfo("Успех", fmt.Sprintf("Привет, %s!", entry.Text), window)
 	})
+	saveBtn.Disable()
 	
-	// Слайдер
+	// Текст статуса внизу
+	status := ui.NewLabel("")
+	
+	// Слайдер громкости с отображением значения
+	volumeLabel := ui.NewLabel("Громкость: 50%")
 	slider := ui.NewSlider(0, 100, 50)
 	slider.OnChanged = func(value float64) {
-		fmt.Printf("Значение слайдера: %.2f\n", value)
+		volumeLabel.SetText(fmt.Sprintf("Громкость: %d%%", int(value)))
 	}
 	
-	// Чекбокс
-	checkbox := ui.NewCheckBox("Согласен с условиями")
-	checkbox.OnChanged = func(checked bool) {
-		fmt.Printf("Чекбокс: %t\n", checked)
+	// Чекбокс согласия
+	agree := ui.NewCheckBox("Согласен с условиями")
+	agree.OnChanged = func(checked bool) {
+		// Кнопка доступна только при валидном вводе и согласии
+		if checked && len(entry.Text) >= 3 {
+			saveBtn.Enable()
+			status.SetText("")
+		} else {
+			saveBtn.Disable()
+			if !checked {
+				status.SetText("Нужно принять условия")
+			}
+		}
 	}
 	
-	// Выпадающий список
+	// Обработка ввода: валидация длины
+	entry.OnChanged = func(text string) {
+		if len(text) < 3 {
+			status.SetText("Имя слишком короткое (>=3)")
+			saveBtn.Disable()
+			return
+		}
+		if agree.Check.Checked { // если согласие уже проставлено
+			saveBtn.Enable()
+			status.SetText("")
+		}
+	}
+	
+	// Выпадающий список с реакцией
 	selectWidget := ui.NewSelect([]string{"Опция 1", "Опция 2", "Опция 3"})
 	selectWidget.OnChanged = func(selected string) {
-		fmt.Printf("Выбрано: %s\n", selected)
+		status.SetText(fmt.Sprintf("Выбрано: %s", selected))
 	}
 	
-	// Поле ввода
-	entry := ui.NewEntry()
-	entry.SetPlaceHolder("Введите текст...")
-	entry.OnChanged = func(text string) {
-		fmt.Printf("Введено: %s\n", text)
-	}
+	// Дополнительная кнопка показа информации
+	infoBtn := ui.NewButton("Показать диалог", func() {
+		ui.ShowInfo("Информация", "Это демонстрация обработчиков событий", window)
+	})
 	
-	// Создаем компоновку
+	// Компоновка
 	content := ui.NewVBox(
 		label,
-		button,
-		iconButton,
-		ui.NewLabel("Слайдер:"),
+		ui.NewLabel("Имя:"),
+		entry,
+		agree,
+		saveBtn,
+		infoBtn,
+		ui.NewLabel("Настройка громкости:"),
 		slider,
-		checkbox,
+		volumeLabel,
 		ui.NewLabel("Выберите опцию:"),
 		selectWidget,
-		ui.NewLabel("Введите текст:"),
-		entry,
+		status,
 	)
 	
 	// Устанавливаем содержимое окна

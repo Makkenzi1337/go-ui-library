@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"strings"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
@@ -40,7 +42,6 @@ func main() {
 		}),
 	)
 	
-	// Создаем содержимое для вкладок
 	// Вкладка 1: Основная информация
 	mainContent := ui.NewVBox(
 		ui.NewLabel("Основная информация"),
@@ -52,23 +53,49 @@ func main() {
 	)
 	
 	// Вкладка 2: Настройки
+	notify := ui.NewCheckBox("Включить уведомления")
+	autosave := ui.NewCheckBox("Автосохранение")
+	themeSelect := ui.NewSelect([]string{"Светлая тема", "Темная тема"})
+	applyBtn := ui.NewButton("Применить настройки", func() {
+		mode := themeSelect.Selected
+		if mode == "Темная тема" {
+			ui.SetDarkTheme()
+		} else {
+			ui.SetLightTheme()
+		}
+		ui.ShowInfo("Настройки", "Настройки применены", window)
+	})
 	settingsContent := ui.NewVBox(
 		ui.NewLabel("Настройки"),
-		ui.NewCheckBox("Включить уведомления"),
-		ui.NewCheckBox("Автосохранение"),
-		ui.NewSelect([]string{"Светлая тема", "Темная тема"}),
-		ui.NewButton("Применить настройки", func() {
-			ui.ShowInfo("Настройки", "Настройки применены", window)
-		}),
+		notify,
+		autosave,
+		themeSelect,
+		applyBtn,
 	)
 	
-	// Вкладка 3: Форма
-	formContent := ui.NewForm(
-		widget.NewFormItem("Имя:", ui.NewEntry()),
-		widget.NewFormItem("Email:", ui.NewEntry()),
-		widget.NewFormItem("Возраст:", ui.NewEntry()),
-		widget.NewFormItem("Пол:", ui.NewSelect([]string{"Мужской", "Женский"})),
+	// Вкладка 3: Форма с валидацией
+	nameEntry := ui.NewEntry()
+	emailEntry := ui.NewEntry()
+	ageEntry := ui.NewEntry()
+	genderSelect := ui.NewSelect([]string{"Мужской", "Женский"})
+	form := ui.NewForm(
+		widget.NewFormItem("Имя:", nameEntry),
+		widget.NewFormItem("Email:", emailEntry),
+		widget.NewFormItem("Возраст:", ageEntry),
+		widget.NewFormItem("Пол:", genderSelect),
 	)
+	submitBtn := ui.NewButton("Отправить", func() {
+		if len(nameEntry.Text) < 3 {
+			ui.ShowError(fmt.Errorf("Имя слишком короткое"), window)
+			return
+		}
+		if !strings.Contains(emailEntry.Text, "@") {
+			ui.ShowError(fmt.Errorf("Некорректный email"), window)
+			return
+		}
+		ui.ShowInfo("Форма", "Форма успешно отправлена", window)
+	})
+	formContent := ui.NewVBox(form, submitBtn)
 	
 	// Создаем вкладки
 	tabs := ui.NewTabs(
@@ -77,11 +104,9 @@ func main() {
 		container.NewTabItem("Форма", formContent),
 	)
 	
-	// Создаем строку состояния
-	statusBar := ui.NewStatusBar("Готово")
-	
-	// Создаем полную компоновку
-	content := ui.CreateFullLayout(toolbar, tabs, statusBar)
+	// Полная компоновка с тулбаром и статусом
+	status := ui.NewStatusBar("Готово к работе")
+	content := ui.CreateFullLayout(toolbar, tabs, status)
 	
 	// Устанавливаем содержимое окна
 	window.SetContent(content)
